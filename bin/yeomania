@@ -1,0 +1,78 @@
+#!/usr/bin/env node
+var path = require("path");
+var fs = require("fs");
+var usage = function(exitNum) {
+  console.log("yeomania [create|recreate] <import generator path> <export path>");
+  console.log("yeomania create <import generator path> <export path>");
+  console.log("yeomania recreate <import generator path> <export generator path>");
+  process.exit(exitNum);
+};
+
+if (process.argv.length < 2) usage(1);
+
+
+process.argv.forEach(function(arg) {
+  if (arg === '-h' || arg === '--help') {
+    usage(0);
+  }
+});
+
+this.opts = function() {
+  this.mode = process.argv[2];
+  if (this.mode === "create") {
+    this.importPath = process.argv[3] || usage(1);
+    this.exportPath = process.argv[4] || __dirname;
+  } else if (this.mode === "recreate") {
+    this.importPath = process.argv[3] || usage(1);
+    this.exportPath = process.argv[4] || __dirname;
+  } else {
+    usage(1);
+  }
+  return this;
+};
+
+var self = this;
+
+var options = self.opts();
+var create = function() {
+  var importPath = path.resolve(options.importPath);
+  var exportPath = path.resolve(options.exportPath);
+  if (!fs.existsSync(exportPath)) {
+    fs.mkdirSync(exportPath);
+  }
+  var node_modules = path.join(exportPath, "node_modules");
+  fs.mkdirSync(node_modules);
+  fs.symlinkSync(importPath, node_modules);
+};
+
+var deleteFolderRecursive = function(path) {
+  if( fs.existsSync(path) ) {
+    fs.readdirSync(path).forEach(function(file,index){
+      var curPath = path + "/" + file;
+      if(fs.statSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
+};
+if (options.mode === "create") {
+  create();
+} else if (options.mode === "recreate") {
+  console.log("remove " + path.resolve(options.exportPath) + " OK? [y/n] ");
+  process.stdin.resume();
+  process.stdin.setEncoding('utf8');
+
+  var answer = "";
+  process.stdin.on('data', function(chunk) {
+    answer += chunk;
+    if (answer.match(/^y/i)) {
+      deleteFolderRecursive(path.resolve(options.exportPath));
+      create();
+    } else {
+      process.exit(1);
+    }
+  });
+}
