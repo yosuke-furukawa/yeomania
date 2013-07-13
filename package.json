@@ -1,6 +1,6 @@
 {
   "name": "yeomania",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "This tool can create yeoman-generator test folder and make it clean.",
   "main": "bin/yeomania",
   "scripts": {
@@ -10,6 +10,9 @@
     "yeoman",
     "tool"
   ],
+  "bin": {
+    "yeomania": "./bin/yeomania"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/yosuke-furukawa/yeomania.git"
