@@ -2,14 +2,17 @@
   "name": "yeomania",
   "version": "0.0.1",
   "description": "This tool can create yeoman-generator test folder and make it clean.",
-  "main": "index.js",
+  "main": "bin/yeomania",
   "scripts": {
     "test": "mocha"
   },
   "keywords": [
     "yeoman",
-    "test"
+    "tool"
   ],
   "author": "yosuke-furukawa",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "~1.12.0"
+  }
 }

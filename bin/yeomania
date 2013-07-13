@@ -21,10 +21,10 @@ this.opts = function() {
   this.mode = process.argv[2];
   if (this.mode === "create") {
     this.importPath = process.argv[3] || usage(1);
-    this.exportPath = process.argv[4] || __dirname;
+    this.exportPath = process.argv[4] || usage(1);
   } else if (this.mode === "recreate") {
     this.importPath = process.argv[3] || usage(1);
-    this.exportPath = process.argv[4] || __dirname;
+    this.exportPath = process.argv[4] || usage(1);
   } else {
     usage(1);
   }
@@ -42,20 +42,29 @@ var create = function() {
   }
   var node_modules = path.join(exportPath, "node_modules");
   fs.mkdirSync(node_modules);
-  fs.symlinkSync(importPath, node_modules);
+  console.log("create symbolic link: " + importPath);
+  var generator_name = path.basename(importPath);
+  generator_path = path.join(node_modules, generator_name);
+  fs.symlinkSync(importPath, generator_path);
 };
 
-var deleteFolderRecursive = function(path) {
-  if( fs.existsSync(path) ) {
-    fs.readdirSync(path).forEach(function(file,index){
-      var curPath = path + "/" + file;
-      if(fs.statSync(curPath).isDirectory()) { // recurse
-        deleteFolderRecursive(curPath);
-      } else { // delete file
+var root = "";
+var deleteRecursive = function(dir) {
+  root = root || dir;
+  if( fs.existsSync(dir) ) {
+    fs.readdirSync(dir).forEach(function(file){
+      var curPath = path.join(dir, file);
+      if (fs.lstatSync(curPath).isSymbolicLink()) {
+        fs.unlinkSync(curPath);
+      } else if (fs.statSync(curPath).isDirectory()) {
+        deleteRecursive(curPath);
+      } else {
         fs.unlinkSync(curPath);
       }
     });
-    fs.rmdirSync(path);
+    if (root !== dir) {
+      fs.rmdirSync(dir);
+    }
   }
 };
 if (options.mode === "create") {
@@ -69,8 +78,9 @@ if (options.mode === "create") {
   process.stdin.on('data', function(chunk) {
     answer += chunk;
     if (answer.match(/^y/i)) {
-      deleteFolderRecursive(path.resolve(options.exportPath));
+      deleteRecursive(path.resolve(options.exportPath));
       create();
+      process.exit(0);
     } else {
       process.exit(1);
     }
