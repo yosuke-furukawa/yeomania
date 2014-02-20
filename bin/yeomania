@@ -41,7 +41,9 @@ var create = function() {
     fs.mkdirSync(exportPath);
   }
   var node_modules = path.join(exportPath, "node_modules");
-  fs.mkdirSync(node_modules);
+  if (!fs.existsSync(node_modules)) {
+    fs.mkdirSync(node_modules);
+  }
   console.log("create symbolic link: " + importPath);
   var generator_name = path.basename(importPath);
   generator_path = path.join(node_modules, generator_name);
