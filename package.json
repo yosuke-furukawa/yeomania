@@ -1,6 +1,6 @@
 {
   "name": "yeomania",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "This tool can create yeoman-generator test folder and make it clean.",
   "main": "bin/yeomania",
   "scripts": {
